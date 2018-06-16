@@ -266,6 +266,9 @@ public class HelloWorld {
         }
     }
 
+    /**
+     * 测试线程优先级
+     */
     @Test
     void test14(){
         MaxPriority maxPriority = new MaxPriority();
@@ -276,5 +279,70 @@ public class HelloWorld {
         minThread.setPriority(Thread.MIN_PRIORITY);
         maxThread.start();
         minThread.start();
+    }
+
+    /**
+     * 测试线程休眠
+     * @throws InterruptedException
+     */
+    @Test
+    void test15() throws InterruptedException {
+        new Thread(new SleepThread()).start();
+        for(int i=1;i<=10;i++){
+            if(i==5){
+                Thread.sleep(2000);
+            }
+            System.out.println("主线程正在输出:"+i);
+            Thread.sleep(500);
+        }
+    }
+
+    class SleepThread implements Runnable{
+        @Override
+        public void run() {
+            for (int i=1;i<=10;i++){
+                if(i==3){
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                System.out.println("线程一正在输出:"+i);
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    class YieldThread extends Thread{
+        public YieldThread(String name){
+            super(name);
+        }
+
+        @Override
+        public void run() {
+            for(int i=0;i<5;i++){
+                System.out.println(Thread.currentThread().getName()+"---"+i);
+                if(i==3){
+                    System.out.println("线程让步:");
+                    Thread.yield();//线程运行到此做出让步
+                }
+            }
+        }
+    }
+
+    /**
+     * 测试线程让步
+     */
+    @Test
+    void test16(){
+        YieldThread yieldThread1 = new YieldThread("线程A");
+        YieldThread yieldThread2 = new YieldThread("线程B");
+        yieldThread1.start();
+        yieldThread2.start();
     }
 }
