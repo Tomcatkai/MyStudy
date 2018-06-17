@@ -201,22 +201,37 @@ public class HelloWorld {
      * 采用实现Runnable接口的方式实现卖票
      */
     @Test
-    void test12(){
+    void test12() throws InterruptedException {
         TicketWindow2 ticketWindow2 = new TicketWindow2();
         Thread thread1 = new Thread(ticketWindow2);
+        thread1.setDaemon(false);
         thread1.start();
         Thread thread2 = new Thread(ticketWindow2);
+        thread2.setDaemon(false);
         thread2.start();
         Thread thread3 = new Thread(ticketWindow2);
+        thread3.setDaemon(false);
         thread3.start();
+        Thread thread4 = new Thread(ticketWindow2);
+//        thread4.setDaemon(false);
+        thread4.start();
+        Thread.sleep(20000);
     }
     class TicketWindow2 implements Runnable{
         private int ticket = 1000;
+        final Object lock = new Object();
         @Override
         public void run(){
-            while (ticket>0){
-                Thread thread = Thread.currentThread();
-                System.out.println(thread.getName()+"正在发售第"+ticket--+"张票");
+            synchronized (lock) {
+                while (ticket > 0) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        System.out.println("hello");
+                    }
+                    System.out.println(Thread.currentThread().getName() + "正在发售第" + ticket-- + "张票");
+                }
             }
         }
     }
@@ -344,5 +359,47 @@ public class HelloWorld {
         YieldThread yieldThread2 = new YieldThread("线程B");
         yieldThread1.start();
         yieldThread2.start();
+    }
+
+    class EmergencyThread implements Runnable{
+        @Override
+        public void run() {
+            //每次循环休眠500ms 循环5次
+            for(int i = 1;i<6;i++){
+                System.out.println(Thread.currentThread().getName()+"输入:"+i);
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+    }
+
+    /**
+     * 测试线程插队的join方法
+     */
+    @Test
+    void test17(){
+        //创建线程后循环5次每次休眠500ms 当循环到第二次时,调用之前线程的join方法
+        Thread thread = new Thread(new EmergencyThread(),"线程一");
+        thread.start();
+        //每次循环休眠500ms 循环5次
+        for(int i = 1;i<6;i++){
+            System.out.println(Thread.currentThread().getName()+"输入:"+i);
+            if(i==2){
+                try {
+                    thread.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
