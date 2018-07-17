@@ -3,6 +3,7 @@ package com.study;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * HelloWorld
@@ -401,5 +402,54 @@ public class HelloWorld {
                 e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * 测试同步方法
+     */
+    @Test
+    void test18() throws InterruptedException {
+        Ticket ticket = new Ticket();
+        CountDownLatch countDownLatch = ticket.countDownLatch;
+        new Thread(ticket,"线程一").start();
+        new Thread(ticket,"线程二").start();
+        new Thread(ticket,"线程三").start();
+        new Thread(ticket,"线程四").start();
+        countDownLatch.await();
+        System.out.println(Thread.currentThread().getName()+"执行完毕");
+    }
+
+    class Ticket implements Runnable{
+        private int tickets = 10;
+        private  CountDownLatch countDownLatch = new CountDownLatch(10);
+        @Override
+        public void run() {
+            while (true){
+                //调用售票方法
+                saleTicket();
+                if(tickets<0){
+                    break;
+                }
+            }
+        }
+
+        /**
+         * 售票同步方法  每卖一张票休眠10ms
+         */
+        private synchronized void saleTicket(){
+            if(tickets>0){
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(Thread.currentThread().getName()+"---卖出的票"+tickets--);
+            }
+        }
+    }
+
+
+    void testme(){
+        int a[] = {};
     }
 }
